@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ByAbuJasm</title>
+<style>
+:root{--bg:#020a05;--panel:#04140a;--fg:#b6f5c8;--dim:#4f8f66;--acc:#2dff7a;--warn:#ffcf40;--line:#0f3a20;color-scheme:dark;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#020a05}}
+:root[data-theme="dark"]{--bg:#020a05}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "JetBrains Mono","Fira Code",ui-monospace,Menlo,Consolas,monospace;min-height:100vh}
+canvas{position:fixed;inset:0;width:100%;height:100%;opacity:.22;z-index:0;pointer-events:none}
+.scan{position:fixed;inset:0;z-index:2;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 3px)}
+main{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:28px 18px 60px}
+.win{background:rgba(4,20,10,.92);border:1px solid var(--line);border-radius:6px;box-shadow:0 0 30px rgba(45,255,122,.08)}
+.bar{display:flex;gap:7px;align-items:center;padding:9px 12px;border-bottom:1px solid var(--line);color:var(--dim);font-size:13px}
+.bar i{width:11px;height:11px;border-radius:50%;background:var(--line);display:inline-block}
+.bar i:nth-child(1){background:#ff5f56}.bar i:nth-child(2){background:#ffbd2e}.bar i:nth-child(3){background:var(--acc)}
+.bar span{margin-left:8px}
+.body{padding:18px}
+h1{font-size:clamp(34px,9vw,72px);line-height:1;margin:6px 0 10px;color:var(--acc);text-shadow:0 0 14px rgba(45,255,122,.55);letter-spacing:-.02em;position:relative;display:inline-block}
+h1.glitch::before,h1.glitch::after{content:attr(data-t);position:absolute;left:0;top:0;width:100%;overflow:hidden}
+h1.glitch::before{color:#ff3b6b;transform:translate(3px,0);clip-path:inset(20% 0 55% 0)}
+h1.glitch::after{color:#38e8ff;transform:translate(-3px,0);clip-path:inset(60% 0 10% 0)}
+.ar{font-size:clamp(20px,5vw,30px);color:var(--dim);margin:0 0 16px}
+.dim{color:var(--dim)}.acc{color:var(--acc)}.warn{color:var(--warn)}
+p{margin:.4em 0}
+a{color:var(--acc)}
+a:focus-visible,input:focus-visible,button:focus-visible{outline:2px solid var(--warn);outline-offset:2px}
+#out{white-space:pre-wrap;word-break:break-word;margin-top:14px}
+#out .ln{margin:0}
+.row{display:flex;gap:8px;align-items:center;margin-top:10px}
+.row label{color:var(--acc);white-space:nowrap}
+#in{flex:1;min-width:0;background:transparent;border:0;color:var(--fg);font:inherit;caret-color:var(--acc)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips button{background:transparent;color:var(--acc);border:1px solid var(--line);border-radius:4px;padding:5px 10px;font:inherit;font-size:14px;cursor:pointer}
+.chips button:hover{background:var(--line)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:18px}
+.card{border:1px solid var(--line);border-radius:6px;padding:14px;background:rgba(4,20,10,.85)}
+.card h3{margin:0 0 6px;color:var(--acc);font-size:16px}
+.card p{margin:0;font-size:14px;color:var(--fg)}
+.bars{margin-top:8px}
+.bar2{display:flex;align-items:center;gap:10px;font-size:14px;margin:4px 0}
+.bar2 b{width:110px;font-weight:400}
+.bar2 s{flex:1;height:8px;background:var(--line);border-radius:2px;overflow:hidden;text-decoration:none}
+.bar2 s em{display:block;height:100%;background:var(--acc);box-shadow:0 0 8px var(--acc)}
+.alert{border:1px solid #ff3b3b;background:rgba(60,0,0,.55);color:#ff9a9a;border-radius:6px;padding:12px 14px;margin-bottom:16px;font-size:14px;animation:pulse 2.4s ease-in-out infinite}
+.alert b{color:#ff4d4d}
+@keyframes pulse{50%{box-shadow:0 0 18px rgba(255,59,59,.45)}}
+.dos{border-color:#ff3b3b!important}
+.dos h3{color:#ff4d4d!important}
+.dos dl{margin:8px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:14px}
+.dos dt{color:var(--dim)}.dos dd{margin:0}
+.thr{display:inline-block;width:100%;height:8px;background:var(--line);border-radius:2px;overflow:hidden;vertical-align:middle}
+.thr em{display:block;width:96%;height:100%;background:#ff3b3b;box-shadow:0 0 8px #ff3b3b}
+@media (prefers-reduced-motion:reduce){.alert{animation:none}}
+footer{margin-top:22px;color:var(--dim);font-size:13px;text-align:center}
+.cur{display:inline-block;width:.6em;height:1.1em;background:var(--acc);vertical-align:text-bottom;animation:bl 1s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cur{animation:none}canvas{display:none}h1.glitch::before,h1.glitch::after{display:none}}
+</style>
+</head>
+<body>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="scan" aria-hidden="true"></div>
+<main>
+  <div class="alert" role="alert"><b>Warning:</b> You are entering the territory of Abu Jasm. Be careful. He is dangerous to weak passwords, lazy admins and unpatched servers. Look around, but don’t touch what isn’t yours.</div>
+  <section class="win" aria-label="Terminal">
+    <div class="bar"><i></i><i></i><i></i><span>abujasm@root: ~</span></div>
+    <div class="body">
+      <p class="dim" id="boot"></p>
+      <h1 class="glitch" data-t="ABU JASM">ABU JASM</h1>
+      <p class="ar" lang="ar" dir="rtl">ابوجاسم</p>
+      <p>Security researcher. Builder. Breaker of things I own.<span class="cur"></span></p>
+      <p class="warn">Threat level: high. Handle with care.</p>
+      <p class="dim">Type a command below, or tap one. Try <span class="acc">help</span>.</p>
+      <div class="chips" id="chips"></div>
+      <div id="out" aria-live="polite"></div>
+      <div class="row"><label for="in">abujasm@root:~$</label><input id="in" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Command"></div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <article class="card dos"><h3>dossier.txt</h3>
+      <dl>
+        <dt>Alias</dt><dd>Abu Jasm (ابوجاسم)</dd>
+        <dt>Status</dt><dd>Active, watching</dd>
+        <dt>Danger</dt><dd><span class="thr"><em></em></span></dd>
+        <dt>Known for</dt><dd>Finding the one door everyone forgot to lock</dd>
+        <dt>Weakness</dt><dd>Strong passwords, patched systems, two-factor</dd>
+        <dt>Advice</dt><dd>Update everything. Trust nothing. Stay out of his logs.</dd>
+      </dl></article>
+    <article class="card"><h3>why be careful</h3><p>He thinks like an attacker, so he sees your mistakes before you do. He doesn’t break laws: every test is authorized. But if your defenses are sloppy, he will find out, and he will write the report.</p></article>
+    <article class="card"><h3>whoami</h3><p>I take systems apart to learn how they fail, then write down how to fix them. Everything I test is authorized and in scope.</p></article>
+    <article class="card"><h3>stack</h3>
+      <div class="bars">
+        <div class="bar2"><b>Pentesting</b><s><em style="width:92%"></em></s></div>
+        <div class="bar2"><b>Networking</b><s><em style="width:85%"></em></s></div>
+        <div class="bar2"><b>Linux</b><s><em style="width:90%"></em></s></div>
+        <div class="bar2"><b>Python</b><s><em style="width:80%"></em></s></div>
+        <div class="bar2"><b>Forensics</b><s><em style="width:70%"></em></s></div>
+      </div>
+    </article>
+    <article class="card"><h3>ctf.log</h3><p>Web, crypto and reverse-engineering challenges. I publish write-ups so the next person learns faster.</p></article>
+    <article class="card"><h3>defend.sh</h3><p>Hardening guides, threat models and incident checklists for small teams that can’t afford a security department.</p></article>
+  </div>
+  <footer>© 2026 Abu Jasm · no logs, no cookies, no tracking</footer>
+</main>
+
+<script>
+(function(){
+  // Matrix rain
+  var c=document.getElementById('rain'),x=c.getContext('2d'),cols,drops,fs=16;
+  function size(){c.width=innerWidth;c.height=innerHeight;cols=Math.ceil(c.width/fs);drops=Array.from({length:cols},function(){return Math.random()*-50})}
+  size();addEventListener('resize',size);
+  var chars='01ABCDEF<>/{}$#abujasm';
+  setInterval(function(){
+    x.fillStyle='rgba(2,10,5,.12)';x.fillRect(0,0,c.width,c.height);
+    x.fillStyle='#2dff7a';x.font=fs+'px monospace';
+    for(var i=0;i<cols;i++){
+      x.fillText(chars[Math.floor(Math.random()*chars.length)],i*fs,drops[i]*fs);
+      if(drops[i]*fs>c.height&&Math.random()>.975)drops[i]=0;drops[i]++;
+    }
+  },60);
+
+  // Boot line
+  var boot=document.getElementById('boot'),msg='[ OK ] link established  [ OK ] identity masked  [ OK ] welcome',i=0;
+  (function t(){boot.textContent=msg.slice(0,i++);if(i<=msg.length)setTimeout(t,22)})();
+
+  // Terminal
+  var out=document.getElementById('out'),inp=document.getElementById('in'),hist=[],hp=0;
+  var cmds={
+    warning:function(){return 'WARNING: Abu Jasm is dangerous to insecure systems.\nBe careful. Patch your servers. Lock your doors.'},
+    dossier:function(){return 'Alias   : Abu Jasm\nStatus  : active, watching\nThreat  : HIGH\nWeakness: strong passwords, 2FA, regular updates'},
+    help:function(){return 'Commands:\n  warning   read this first\n  dossier   file on Abu Jasm\n  about     who is Abu Jasm\n  skills    what I work with\n  projects  things I’ve built\n  contact   how to reach me\n  matrix    toggle the rain\n  clear     wipe the screen'},
+    about:function(){return 'Abu Jasm — security researcher from the UAE.\nI study how systems break so they can be built stronger.\nEthics first: authorized targets only, responsible disclosure always.'},
+    skills:function(){return 'pentesting · network analysis · Linux internals\nPython · Bash · reverse engineering · digital forensics'},
+    projects:function(){return '[1] ghostwatch  — lightweight log anomaly spotter\n[2] portmap-lab — home-lab network mapper for learning\n[3] ctf-notes   — public write-ups and cheat sheets'},
+    contact:function(){return 'email : hello@abujasm.example\nsignal: ask me for a handle\nPGP   : available on request'},
+    sudo:function(){return 'abujasm is not in the sudoers file. This incident will be reported.'},
+    ls:function(){return 'about  skills  projects  contact  .secrets'},
+    'cat .secrets':function(){return 'Nice try. Nothing here but good habits.'},
+    whoami:function(){return 'visitor'},
+    matrix:function(){c.style.display=c.style.display==='none'?'block':'none';return 'rain toggled'},
+    clear:function(){out.innerHTML='';return null}
+  };
+  function print(t,cls){if(t===null)return;var p=document.createElement('p');p.className='ln '+(cls||'');p.textContent=t;out.appendChild(p)}
+  function run(raw){
+    var q=raw.trim().toLowerCase();if(!q)return;
+    print('abujasm@root:~$ '+raw,'dim');hist.push(raw);hp=hist.length;
+    var f=cmds[q];
+    if(f)print(f());else print('command not found: '+q+'. Type help.','warn');
+    window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
+  }
+  inp.addEventListener('keydown',function(e){
+    if(e.key==='Enter'){run(inp.value);inp.value=''}
+    else if(e.key==='ArrowUp'&&hist.length){hp=Math.max(0,hp-1);inp.value=hist[hp]||'';e.preventDefault()}
+    else if(e.key==='ArrowDown'){hp=Math.min(hist.length,hp+1);inp.value=hist[hp]||''}
+  });
+  var chips=document.getElementById('chips');
+  ['help','warning','dossier','about','skills','projects','contact'].forEach(function(n){
+    var b=document.createElement('button');b.type='button';b.textContent=n;
+    b.onclick=function(){run(n)};chips.appendChild(b);
+  });
+  run('help');
+})();
+</script>
+</body>
+</html>
